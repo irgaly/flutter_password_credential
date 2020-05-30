@@ -1,0 +1,30 @@
+name: password_credential
+description: Access to Platform Password Credentials.
+version: 0.1.0
+author: irgaly
+homepage: https://github.com/irgaly/flutter_password_credential
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: net.irgaly.password_credential
+        pluginClass: PasswordCredentialPlugin
+      web:
+        pluginClass: PasswordCredentialPlugin
+        fileName: password_credential_web.dart
+
