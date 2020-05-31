@@ -21,13 +21,13 @@ class Credentials {
   /// return: a PasswordCredential, or null if cannot get single Password from Credential Store
   Future<PasswordCredential> get(Mediation mediation) async {
     return await _channel
-        .invokeMethod("get", <String, dynamic>{"mediation": mediation});
+        .invokeMethod("get", <String, dynamic>{"mediation": mediation.string});
   }
 
   /// store Password Credential
   Future<void> store(PasswordCredential credential) async {
-    return await _channel
-        .invokeMethod("store", <String, dynamic>{"credential": credential});
+    return await _channel.invokeMethod(
+        "store", <String, dynamic>{"credential": credential.toMap()});
   }
 
   /// clear password for an id

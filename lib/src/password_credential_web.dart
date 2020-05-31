@@ -19,15 +19,18 @@ class PasswordCredentialPlugin {
       case "hasCredentialFeature":
         return await _hasCredentialFeature();
       case "get":
-        final Mediation mediation =
-            call.arguments["mediation"] ?? Mediation.Silent;
+        var mediation = Mediation.Silent;
+        var arg = call.arguments["mediation"];
+        if (arg != null) {
+          mediation = mediationFrom(arg);
+        }
         return await _get(mediation);
       case "store":
-        final PasswordCredential credential = call.arguments["credential"];
-        if (credential == null) {
+        var arg = call.arguments["credential"];
+        if (arg == null) {
           throw ArgumentError("credential is null");
         }
-        return await _store(credential);
+        return await _store(PasswordCredential.fromMap(arg));
       case "delete":
         final String id = call.arguments["id"];
         if (id == null) {

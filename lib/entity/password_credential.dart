@@ -10,4 +10,16 @@ class PasswordCredential {
 
   PasswordCredential(
       {@required this.id, @required this.password, this.name, this.iconUrl});
+
+  factory PasswordCredential.fromMap(Map<String, dynamic> map) {
+    return PasswordCredential(
+        id: map["id"],
+        password: map["password"],
+        name: map["name"],
+        iconUrl: map["iconUrl"]);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {"id": name, "password": password, "name": name, "iconUrl": iconUrl};
+  }
 }

@@ -11,3 +11,16 @@ enum Mediation {
   /// User mediation required always
   Required
 }
+
+extension ToString on Mediation {
+  String get string => toString().split('.').last;
+}
+
+Mediation mediationFrom(String value) {
+  var result =
+      Mediation.values.firstWhere((v) => v.toString().split(".").last == value);
+  if (result == null) {
+    throw ArgumentError.value(value);
+  }
+  return result;
+}
