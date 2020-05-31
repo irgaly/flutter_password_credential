@@ -20,11 +20,11 @@ class PasswordCredentialPlugin {
       case "hasCredentialFeature":
         return await _hasCredentialFeature();
       case "get":
-        var mediation = Mediation.Silent;
         String arg = call.arguments["mediation"];
-        if (arg != null) {
-          mediation = mediationFrom(arg);
+        if (arg == null) {
+          throw ArgumentError("mediation is null");
         }
+        var mediation = mediationFrom(arg);
         var result = await _get(mediation);
         String ret;
         if (result != null) {

@@ -21,8 +21,8 @@ class Credentials {
   /// mediation: if null, default is Mediation.Silent
   /// return: a PasswordCredential, or null if cannot get single Password from Credential Store
   Future<PasswordCredential> get(Mediation mediation) async {
-    String result = await _channel
-        .invokeMethod("get", <String, dynamic>{"mediation": mediation.string});
+    String result = await _channel.invokeMethod("get",
+        <String, dynamic>{"mediation": (mediation ?? Mediation.Silent).string});
     PasswordCredential credential;
     if (result != null) {
       credential = PasswordCredential.fromJson(jsonDecode(result));
@@ -32,10 +32,13 @@ class Credentials {
 
   /// store Password Credential
   ///
+  /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
   /// return: true if storing is succeeded
-  Future<bool> store(PasswordCredential credential) async {
-    return await _channel.invokeMethod(
-        "store", <String, dynamic>{"credential": jsonEncode(credential)});
+  Future<bool> store(PasswordCredential credential, Mediation mediation) async {
+    return await _channel.invokeMethod("store", <String, dynamic>{
+      "credential": jsonEncode(credential),
+      "mediation": (mediation ?? Mediation.Optional).string
+    });
   }
 
   /// clear password for an id

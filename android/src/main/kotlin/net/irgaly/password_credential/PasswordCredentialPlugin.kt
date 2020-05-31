@@ -34,7 +34,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     private var requestCodeRead = 1130
 
     private lateinit var credentialsClient: CredentialsClient
-    var pendingSaveContinuation: Continuation<Unit>? = null
+    var pendingSaveContinuation: Continuation<Boolean>? = null
     var pendingReadContinuation: Continuation<PasswordCredential?>? = null
     val pendingLock = Object()
 
@@ -81,7 +81,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                     "get" -> {
                         val mediation = call.argument<String>("mediation")?.let {
                             Json.parse(Mediation.serializer(), it)
-                        } ?: Mediation.Silent
+                        } ?: throw IllegalArgumentException("mediation is null")
                         val ret = get(mediation)?.let {
                             Json.stringify(PasswordCredential.serializer(), it)
                         }
@@ -91,10 +91,14 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                         val credential = call.argument<String>("credential")?.let {
                             Json.parse(PasswordCredential.serializer(), it)
                         } ?: throw IllegalArgumentException("credential is null")
-                        result.success(store(credential))
+                        val mediation = call.argument<String>("mediation")?.let {
+                            Json.parse(Mediation.serializer(), it)
+                        } ?: throw IllegalArgumentException("mediation is null")
+                        result.success(store(credential, mediation))
                     }
                     "delete" -> {
-                        val id = call.argument<String>("id") ?: throw IllegalArgumentException("id is null")
+                        val id = call.argument<String>("id")
+                                ?: throw IllegalArgumentException("id is null")
                         delete(id)
                         result.success(null)
                     }
@@ -119,7 +123,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                 }
             }
         }
-        return suspendCancellableCoroutine{ continuation ->
+        return suspendCoroutine { continuation ->
             credentialsClient.request(CredentialRequest.Builder()
                     .setPasswordLoginSupported(true) // get ID/Password Credential
                     .build()).addOnCompleteListener { task ->
@@ -165,17 +169,54 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         }
     }
 
-    private suspend fun store(credential: PasswordCredential): Boolean {
-        throw NotImplementedError()
+    private suspend fun store(credential: PasswordCredential, mediation: Mediation): Boolean {
+        if (mediation == Mediation.Required) {
+            // disable Silent Access
+            suspendCoroutine<Unit> { continuation ->
+                credentialsClient.delete(Credential.Builder(credential.id).build()).addOnCompleteListener {
+                    continuation.resume(Unit)
+                }
+            }
+        }
+        return suspendCoroutine { continuation ->
+            credentialsClient.save(Credential.Builder(credential.id)
+                    .setPassword(credential.password)
+                    .build()).addOnCompleteListener { task ->
+                val e = task.exception
+                when {
+                    task.isSuccessful -> continuation.resume(true) // Save Complete with no user interaction
+                    e is ResolvableApiException -> {
+                        // User Action is required at first credential save
+                        if (mediation != Mediation.Silent) {
+                            synchronized(pendingLock) {
+                                pendingSaveContinuation?.resume(false)
+                                pendingSaveContinuation = continuation
+                            }
+                            pendingSaveContinuation = continuation
+                            e.startResolutionForResult(activity, requestCodeSave)
+                        } else {
+                            continuation.resume(false) // User interaction is not allowed
+                        }
+                    }
+                    e is ApiException ->
+                        continuation.resume(when (e.statusCode) {
+                            CommonStatusCodes.API_NOT_CONNECTED -> false // GooglePlayServices is missing, or Access Error
+                            CommonStatusCodes.CANCELED -> false // Smartlock for Passwords is disabled by user system setting
+                            else -> false // unknown error
+                        })
+                    else -> continuation.resume(false) // this cannot be happen, treat as failed for safe.
+                }
+            }
+        }
     }
 
-    private suspend fun delete(id: String) = suspendCancellableCoroutine<Unit>{ continuation ->
+    private suspend fun delete(id: String) = suspendCoroutine<Unit> { continuation ->
         credentialsClient.delete(Credential.Builder(id).build()).addOnCompleteListener {
             continuation.resume(Unit)
         }
     }
 
-    private suspend fun preventSilentAccess() = suspendCancellableCoroutine<Unit>{ continuation ->
+    private suspend fun preventSilentAccess() = suspendCoroutine<Unit> { continuation ->
         credentialsClient.disableAutoSignIn().addOnCompleteListener {
             continuation.resume(Unit)
         }
@@ -190,8 +231,8 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
             requestCodeSave -> {
                 synchronized(pendingLock) {
                     pendingSaveContinuation?.resume(when (resultCode) {
-                        Activity.RESULT_OK -> Unit
-                        else -> Unit // this is user cancel, or other error. but ignore this error.
+                        Activity.RESULT_OK -> true
+                        else -> false // this is user cancel, or other error.
                     })
                     pendingSaveContinuation = null
                 }
