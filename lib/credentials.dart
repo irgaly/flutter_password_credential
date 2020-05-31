@@ -31,7 +31,9 @@ class Credentials {
   }
 
   /// store Password Credential
-  Future<void> store(PasswordCredential credential) async {
+  ///
+  /// return: true if storing is succeeded
+  Future<bool> store(PasswordCredential credential) async {
     return await _channel.invokeMethod(
         "store", <String, dynamic>{"credential": jsonEncode(credential)});
   }

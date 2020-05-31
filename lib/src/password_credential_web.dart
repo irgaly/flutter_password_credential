@@ -67,7 +67,7 @@ class PasswordCredentialPlugin {
     return null;
   }
 
-  Future<void> _store(PasswordCredential credential) async {
+  Future<bool> _store(PasswordCredential credential) async {
     var credentials = html.window.navigator.credentials;
     var c = await credentials.create({
       "password": {
@@ -77,7 +77,8 @@ class PasswordCredentialPlugin {
         "iconUrl": credential.iconUrl
       }
     });
-    await credentials.store(c);
+    html.Credential result = await credentials.store(c);
+    return (result?.id == credential.id);
   }
 
   Future<void> _delete(String id) async {
