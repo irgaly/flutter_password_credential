@@ -1,13 +1,16 @@
 package net.irgaly.password_credential
 
+import android.content.Intent
 import androidx.annotation.NonNull;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
+import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,10 +22,13 @@ import net.irgaly.password_credential.entity.PasswordCredential
 import kotlin.coroutines.CoroutineContext
 
 @Suppress("unused")
-class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, CoroutineScope {
+class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener, CoroutineScope {
     private lateinit var channel: MethodChannel
     private lateinit var job: Job
     override val coroutineContext: CoroutineContext get() = job + Dispatchers.Default
+
+    private var requestCodeSave = 1129
+    private var requestCodeRead = 1130
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         job = Job()
@@ -31,9 +37,25 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, CoroutineScop
         }
     }
 
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        binding.addActivityResultListener(this)
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    }
+
+    override fun onDetachedFromActivity() {
+    }
+
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         job.cancel()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
     }
 
     @OptIn(UnstableDefault::class)
