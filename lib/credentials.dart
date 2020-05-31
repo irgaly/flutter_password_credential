@@ -1,4 +1,5 @@
 import "dart:async";
+import 'dart:convert';
 
 import "package:flutter/services.dart";
 import 'package:password_credential/entity/password_credential.dart';
@@ -20,14 +21,19 @@ class Credentials {
   /// mediation: if null, default is Mediation.Silent
   /// return: a PasswordCredential, or null if cannot get single Password from Credential Store
   Future<PasswordCredential> get(Mediation mediation) async {
-    return await _channel
+    String result = await _channel
         .invokeMethod("get", <String, dynamic>{"mediation": mediation.string});
+    PasswordCredential credential;
+    if (result != null) {
+      credential = PasswordCredential.fromJson(jsonDecode(result));
+    }
+    return credential;
   }
 
   /// store Password Credential
   Future<void> store(PasswordCredential credential) async {
     return await _channel.invokeMethod(
-        "store", <String, dynamic>{"credential": credential.toMap()});
+        "store", <String, dynamic>{"credential": jsonEncode(credential)});
   }
 
   /// clear password for an id

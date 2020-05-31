@@ -11,15 +11,15 @@ class PasswordCredential {
   PasswordCredential(
       {@required this.id, @required this.password, this.name, this.iconUrl});
 
-  factory PasswordCredential.fromMap(Map<String, dynamic> map) {
+  factory PasswordCredential.fromJson(Map<String, dynamic> json) {
     return PasswordCredential(
-        id: map["id"],
-        password: map["password"],
-        name: map["name"],
-        iconUrl: map["iconUrl"]);
+        id: json["id"],
+        password: json["password"],
+        name: json["name"],
+        iconUrl: json["iconUrl"]);
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {"id": name, "password": password, "name": name, "iconUrl": iconUrl};
   }
 }

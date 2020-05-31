@@ -48,6 +48,7 @@ android {
     }
     defaultConfig {
         minSdkVersion 16
+        consumerProguardFiles "proguard-rules.pro"
     }
     lintOptions {
         disable "InvalidPackage"
@@ -69,4 +70,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "com.google.android.gms:play-services-auth:18.0.0"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7"
 }

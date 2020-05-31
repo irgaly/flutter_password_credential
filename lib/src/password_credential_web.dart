@@ -1,4 +1,5 @@
 import "dart:async";
+import 'dart:convert';
 import "dart:html" as html;
 import "dart:js";
 
@@ -20,17 +21,22 @@ class PasswordCredentialPlugin {
         return await _hasCredentialFeature();
       case "get":
         var mediation = Mediation.Silent;
-        var arg = call.arguments["mediation"];
+        String arg = call.arguments["mediation"];
         if (arg != null) {
           mediation = mediationFrom(arg);
         }
-        return await _get(mediation);
+        var result = await _get(mediation);
+        String ret;
+        if (result != null) {
+          ret = jsonEncode(result);
+        }
+        return ret;
       case "store":
-        var arg = call.arguments["credential"];
+        String arg = call.arguments["credential"];
         if (arg == null) {
           throw ArgumentError("credential is null");
         }
-        return await _store(PasswordCredential.fromMap(arg));
+        return await _store(PasswordCredential.fromJson(jsonDecode(arg)));
       case "delete":
         final String id = call.arguments["id"];
         if (id == null) {
