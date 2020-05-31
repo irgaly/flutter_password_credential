@@ -3,10 +3,10 @@ package net.irgaly.password_credential
 import android.app.Activity
 import android.content.Intent
 import androidx.annotation.NonNull;
-import com.google.android.gms.auth.api.credentials.Credential
-import com.google.android.gms.auth.api.credentials.Credentials
-import com.google.android.gms.auth.api.credentials.CredentialsClient
-import com.google.android.gms.auth.api.credentials.CredentialsOptions
+import com.google.android.gms.auth.api.credentials.*
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.gms.common.api.ResolvableApiException
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -21,15 +21,13 @@ import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import net.irgaly.password_credential.entity.Mediation
 import net.irgaly.password_credential.entity.PasswordCredential
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.*
 
 @Suppress("unused")
 class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener, CoroutineScope {
     private lateinit var channel: MethodChannel
     private lateinit var job: Job
+    private var activity: Activity? = null
     override val coroutineContext: CoroutineContext get() = job + Dispatchers.Default
 
     private var requestCodeSave = 1129
@@ -56,6 +54,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         binding.addActivityResultListener(this)
+        activity = binding.activity
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -65,52 +64,12 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
 
     override fun onDetachedFromActivity() {
+        activity = null
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         job.cancel()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        when (requestCode) {
-            requestCodeSave -> {
-                synchronized(pendingLock) {
-                    pendingSaveContinuation?.resume(when (resultCode) {
-                        Activity.RESULT_OK -> Unit
-                        else -> Unit // this is user cancel, or other error. but ignore this error.
-                    })
-                    pendingSaveContinuation = null
-                }
-                return true
-            }
-            requestCodeRead -> {
-                synchronized(pendingLock) {
-                    pendingReadContinuation?.resume(
-                            when (resultCode) {
-                                Activity.RESULT_OK ->
-                                    data?.getParcelableExtra<Credential>(Credential.EXTRA_KEY)?.let { credential ->
-                                        val password = credential.password
-                                        if (password != null) {
-                                            PasswordCredential(
-                                                    credential.id,
-                                                    password,
-                                                    credential.name,
-                                                    credential.profilePictureUri.toString()
-                                            )
-                                        } else {
-                                            null // Credential is not password credential.
-                                        }
-                                    }
-                                else -> null // this is user cancel, or other error. this results to null.
-                            }
-                    )
-                    pendingReadContinuation = null
-                }
-                return true
-            }
-        }
-        return false
     }
 
     @OptIn(UnstableDefault::class)
@@ -152,7 +111,58 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
 
     private suspend fun get(mediation: Mediation): PasswordCredential? {
-        throw NotImplementedError()
+        if (mediation == Mediation.Required) {
+            // disable Silent Access
+            suspendCoroutine<Unit> { continuation ->
+                credentialsClient.disableAutoSignIn().addOnCanceledListener {
+                    continuation.resume(Unit)
+                }
+            }
+        }
+        return suspendCancellableCoroutine{ continuation ->
+            credentialsClient.request(CredentialRequest.Builder()
+                    .setPasswordLoginSupported(true) // get ID/Password Credential
+                    .build()).addOnCompleteListener { task ->
+                val e = task.exception
+                val result = if (e == null) task.result else null
+                val credential = result?.credential
+                when {
+                    (credential != null) -> {
+                        val password = credential.password
+                        val ret = if (password != null) {
+                            PasswordCredential(
+                                    credential.id,
+                                    password,
+                                    credential.name,
+                                    credential.profilePictureUri.toString()
+                            )
+                        } else {
+                            null // Credential is not password credential.
+                        }
+                        continuation.resume(ret)
+                    }
+                    e is ResolvableApiException -> {
+                        if (mediation != Mediation.Silent) {
+                            synchronized(pendingLock) {
+                                pendingReadContinuation?.resume(null)
+                                pendingReadContinuation = continuation
+                            }
+                            e.startResolutionForResult(activity, requestCodeRead)
+                        } else {
+                            continuation.resume(null) // mediation is Silent, so failed to get credential
+                        }
+                    }
+                    e is ApiException ->
+                        continuation.resume(when (e.statusCode) {
+                            CommonStatusCodes.SIGN_IN_REQUIRED -> null // This is Hint (= ID) only Credential
+                            CommonStatusCodes.API_NOT_CONNECTED -> null // GooglePlayServices is missing, or Access Error
+                            CommonStatusCodes.CANCELED -> null // Smartlock for Passwords is disabled by user system setting
+                            else -> null // unknown error
+                        })
+                    else -> continuation.resume(null) // this cannot be happen, treat as failed for safe.
+                }
+            }
+        }
     }
 
     private suspend fun store(credential: PasswordCredential): Boolean {
@@ -173,5 +183,46 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
 
     private fun hasCredentialFeature(): Boolean {
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        when (requestCode) {
+            requestCodeSave -> {
+                synchronized(pendingLock) {
+                    pendingSaveContinuation?.resume(when (resultCode) {
+                        Activity.RESULT_OK -> Unit
+                        else -> Unit // this is user cancel, or other error. but ignore this error.
+                    })
+                    pendingSaveContinuation = null
+                }
+                return true
+            }
+            requestCodeRead -> {
+                synchronized(pendingLock) {
+                    pendingReadContinuation?.resume(
+                            when (resultCode) {
+                                Activity.RESULT_OK ->
+                                    data?.getParcelableExtra<Credential>(Credential.EXTRA_KEY)?.let { credential ->
+                                        val password = credential.password
+                                        if (password != null) {
+                                            PasswordCredential(
+                                                    credential.id,
+                                                    password,
+                                                    credential.name,
+                                                    credential.profilePictureUri.toString()
+                                            )
+                                        } else {
+                                            null // Credential is not password credential.
+                                        }
+                                    }
+                                else -> null // this is user cancel, or other error. this results to null.
+                            }
+                    )
+                    pendingReadContinuation = null
+                }
+                return true
+            }
+        }
+        return false
     }
 }
