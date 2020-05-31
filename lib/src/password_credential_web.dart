@@ -7,6 +7,7 @@ import "package:flutter/services.dart";
 import "package:flutter_web_plugins/flutter_web_plugins.dart";
 import "package:password_credential/entity/mediation.dart";
 import "package:password_credential/entity/password_credential.dart";
+import "package:platform_detect/platform_detect.dart";
 
 class PasswordCredentialPlugin {
   static void registerWith(Registrar registrar) {
@@ -45,6 +46,8 @@ class PasswordCredentialPlugin {
         return await _delete(id);
       case "preventSilentAccess":
         return await _preventSilentAccess();
+      case "openPlatformCredentialSettings":
+        return await _openPlatformCredentialSettings();
       default:
         throw PlatformException(
             code: "Unimplemented",
@@ -91,6 +94,12 @@ class PasswordCredentialPlugin {
 
   Future<void> _preventSilentAccess() async {
     return await html.window.navigator.credentials.preventSilentAccess();
+  }
+
+  Future<void> _openPlatformCredentialSettings() async {
+    if (browser.isChrome) {
+      html.window.open("chrome://settings/passwords", null);
+    }
   }
 
   String _getMediation(Mediation mediation) {

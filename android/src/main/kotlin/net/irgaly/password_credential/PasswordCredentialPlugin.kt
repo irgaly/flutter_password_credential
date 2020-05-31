@@ -106,12 +106,20 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                         preventSilentAccess()
                         result.success(null)
                     }
+                    "openPlatformCredentialSettings" -> {
+                        openPlatformCredentialSettings()
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             } catch (e: Throwable) {
                 result.error(e.javaClass.name, e.message, e.stackTrace)
             }
         }
+    }
+
+    private fun hasCredentialFeature(): Boolean {
+        return true
     }
 
     private suspend fun get(mediation: Mediation): PasswordCredential? {
@@ -222,8 +230,11 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         }
     }
 
-    private fun hasCredentialFeature(): Boolean {
-        return true
+    private fun openPlatformCredentialSettings() {
+        // Open Google Play Services Account Settings
+        activity?.startActivity(Intent().apply {
+            setClassName("com.google.android.gms", ".app.settings.GoogleSettingsIALink")
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {

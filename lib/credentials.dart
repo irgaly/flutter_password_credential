@@ -53,4 +53,12 @@ class Credentials {
   Future<void> preventSilentAccess() async {
     return await _channel.invokeMethod("preventSilentAccess");
   }
+
+  /// Open Platform Specific Password Credential Settings
+  ///
+  /// Android: Google Play Services Account Settings Page
+  /// Web Chrome: chrome://settings/passwords
+  Future<void> openPlatformCredentialSettings() async {
+    return await _channel.invokeMethod("openPlatformCredentialSettings");
+  }
 }
