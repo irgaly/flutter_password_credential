@@ -20,6 +20,6 @@ class PasswordCredential {
   }
 
   Map<String, dynamic> toJson() {
-    return {"id": name, "password": password, "name": name, "iconUrl": iconUrl};
+    return {"id": id, "password": password, "name": name, "iconUrl": iconUrl};
   }
 }

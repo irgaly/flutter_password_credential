@@ -34,6 +34,7 @@ class Credentials {
   ///
   /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
   /// return: true if storing is succeeded
+  /// throws ArgumentError: id or password is empty
   Future<bool> store(String id, String password, Mediation mediation) async {
     return await storeCredential(
         PasswordCredential(id: id, password: password), mediation);
@@ -43,8 +44,15 @@ class Credentials {
   ///
   /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
   /// return: true if storing is succeeded
+  /// throws ArgumentError: id or password is empty
   Future<bool> storeCredential(
       PasswordCredential credential, Mediation mediation) async {
+    if (credential.id.isEmpty) {
+      throw ArgumentError.value(credential, "id cannot be empty");
+    }
+    if (credential.password.isEmpty) {
+      throw ArgumentError.value(credential, "password cannot be empty");
+    }
     return await _channel.invokeMethod("store", <String, dynamic>{
       "credential": jsonEncode(credential),
       "mediation": (mediation ?? Mediation.Optional).string
@@ -53,9 +61,15 @@ class Credentials {
 
   /// clear password for an id
   ///
+  /// id: ID String, this cannot be empty
+  /// throws ArgumentError: id is empty
+  ///
   /// Web: Overwrite Credential with Empty Password
   /// Android: Delete Credential
   Future<void> delete(String id) async {
+    if (id.isEmpty) {
+      throw ArgumentError.value(id, "id cannot be empty");
+    }
     return await _channel.invokeMethod("delete", <String, dynamic>{"id": id});
   }
 

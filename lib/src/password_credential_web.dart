@@ -71,6 +71,12 @@ class PasswordCredentialPlugin {
   }
 
   Future<bool> _store(PasswordCredential credential) async {
+    if (credential.id.isEmpty) {
+      throw ArgumentError.value(credential, "id cannot be empty");
+    }
+    if (credential.password.isEmpty) {
+      throw ArgumentError.value(credential, "password cannot be empty");
+    }
     var credentials = html.window.navigator.credentials;
     var c = await credentials.create({
       "password": {
@@ -85,6 +91,9 @@ class PasswordCredentialPlugin {
   }
 
   Future<void> _delete(String id) async {
+    if (id.isEmpty) {
+      throw ArgumentError.value(id, "id cannot be empty");
+    }
     var credentials = html.window.navigator.credentials;
     var c = await credentials.create({
       "password": {"id": id, "password": ""}

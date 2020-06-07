@@ -19,7 +19,7 @@ class Model with ChangeNotifier {
   }
 
   Future<bool> store(Mediation mediation) async {
-    await _credentials.store(idEdit.text, passwordEdit.text, mediation);
+    return await _credentials.store(idEdit.text, passwordEdit.text, mediation);
   }
 
   Future<PasswordCredential> get(Mediation mediation) async {
@@ -32,15 +32,15 @@ class Model with ChangeNotifier {
     return credential;
   }
 
-  void delete() async {
+  Future<void> delete() async {
     await _credentials.delete(idEdit.text);
   }
 
-  void preventSilentAccess() async {
+  Future<void> preventSilentAccess() async {
     await _credentials.preventSilentAccess();
   }
 
-  void openPlatformCredentialSettings() async {
+  Future<void> openPlatformCredentialSettings() async {
     await _credentials.openPlatformCredentialSettings();
   }
 }

@@ -1,8 +1,9 @@
 package net.irgaly.password_credential
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
-import androidx.annotation.NonNull;
+import android.util.Log
 import com.google.android.gms.auth.api.credentials.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
@@ -19,8 +20,10 @@ import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.*
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import net.irgaly.password_credential.entity.Mediation
 import net.irgaly.password_credential.entity.PasswordCredential
+import net.irgaly.password_credential.entity.mediationFrom
 import kotlin.coroutines.*
 
 @Suppress("unused")
@@ -34,9 +37,10 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     private var requestCodeRead = 1130
 
     private lateinit var credentialsClient: CredentialsClient
-    var pendingSaveContinuation: Continuation<Boolean>? = null
-    var pendingReadContinuation: Continuation<PasswordCredential?>? = null
-    val pendingLock = Object()
+    private var pendingSaveContinuation: Continuation<Boolean>? = null
+    private var pendingReadContinuation: Continuation<PasswordCredential?>? = null
+    private val pendingLock = Object()
+    private val json = Json(JsonConfiguration.Stable.copy(isLenient = false))
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         job = Job()
@@ -80,19 +84,19 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                     "hasCredentialFeature" -> result.success(hasCredentialFeature())
                     "get" -> {
                         val mediation = call.argument<String>("mediation")?.let {
-                            Json.parse(Mediation.serializer(), it)
+                            mediationFrom(it)
                         } ?: throw IllegalArgumentException("mediation is null")
                         val ret = get(mediation)?.let {
-                            Json.stringify(PasswordCredential.serializer(), it)
+                            json.stringify(PasswordCredential.serializer(), it)
                         }
                         result.success(ret)
                     }
                     "store" -> {
                         val credential = call.argument<String>("credential")?.let {
-                            Json.parse(PasswordCredential.serializer(), it)
+                            json.parse(PasswordCredential.serializer(), it)
                         } ?: throw IllegalArgumentException("credential is null")
                         val mediation = call.argument<String>("mediation")?.let {
-                            Json.parse(Mediation.serializer(), it)
+                            mediationFrom(it)
                         } ?: throw IllegalArgumentException("mediation is null")
                         result.success(store(credential, mediation))
                     }
@@ -113,7 +117,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                     else -> result.notImplemented()
                 }
             } catch (e: Throwable) {
-                result.error(e.javaClass.name, e.message, e.stackTrace.toString())
+                result.error(e.javaClass.name, e.message, Log.getStackTraceString(e))
             }
         }
     }
@@ -126,7 +130,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         if (mediation == Mediation.Required) {
             // disable Silent Access
             suspendCoroutine<Unit> { continuation ->
-                credentialsClient.disableAutoSignIn().addOnCanceledListener {
+                credentialsClient.disableAutoSignIn().addOnCompleteListener {
                     continuation.resume(Unit)
                 }
             }
@@ -178,6 +182,12 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
 
     private suspend fun store(credential: PasswordCredential, mediation: Mediation): Boolean {
+        if (credential.id.isEmpty()) {
+            throw IllegalArgumentException("id cannot be empty")
+        }
+        if (credential.password.isEmpty()) {
+            throw IllegalArgumentException("password cannot be empty")
+        }
         if (mediation == Mediation.Required) {
             // disable Silent Access
             suspendCoroutine<Unit> { continuation ->
@@ -219,6 +229,9 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
 
     private suspend fun delete(id: String) = suspendCoroutine<Unit> { continuation ->
+        if (id.isEmpty()) {
+            throw IllegalArgumentException("id cannot be empty")
+        }
         credentialsClient.delete(Credential.Builder(id).build()).addOnCompleteListener {
             continuation.resume(Unit)
         }
@@ -233,7 +246,8 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     private fun openPlatformCredentialSettings() {
         // Open Google Play Services Account Settings
         activity?.startActivity(Intent().apply {
-            setClassName("com.google.android.gms", ".app.settings.GoogleSettingsIALink")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            component = ComponentName("com.google.android.gms", "com.google.android.gms.app.settings.GoogleSettingsIALink")
         })
     }
 

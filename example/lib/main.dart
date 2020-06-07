@@ -17,7 +17,7 @@ class App extends StatelessWidget {
         child: Consumer<Model>(builder: (context, model, _) {
           return MaterialApp(
               debugShowCheckedModeBanner: false,
-              home: Scaffold(body: () {
+              home: Scaffold(body: Builder(builder: (context) {
                 void snackbar(String message) {
                   Scaffold.of(context)
                       .showSnackBar(SnackBar(content: Text(message)));
@@ -25,76 +25,89 @@ class App extends StatelessWidget {
 
                 return SafeArea(
                     child: Column(children: [
-                  Column(children: [
-                    Row(
-                      children: [
-                        Container(width: 80, child: Text("ID")),
-                        Expanded(
-                            child: Container(
-                                child: TextField(controller: model.idEdit),
-                                margin: EdgeInsets.only(right: 20))),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Container(width: 80, child: Text("Password")),
-                        Expanded(
-                            child: Container(
+                  Container(
+                      child: Column(children: [
+                        Row(
+                          children: [
+                            Container(width: 80, child: Text("ID")),
+                            Expanded(child: TextField(controller: model.idEdit))
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(width: 80, child: Text("Password")),
+                            Expanded(
                                 child:
-                                    TextField(controller: model.passwordEdit),
-                                margin: EdgeInsets.only(right: 20))),
-                      ],
-                    ),
-                  ]),
+                                    TextField(controller: model.passwordEdit))
+                          ],
+                        ),
+                      ]),
+                      margin: EdgeInsets.only(left: 20, right: 20)),
                   Expanded(
                       child: ListView(children: <Widget>[
                     ListTile(
                       title: Text("Store(Silent)"),
-                      onTap: () {
-                        var result = model.store(Mediation.Silent);
-                        snackbar(result.toString());
+                      onTap: () async {
+                        try {
+                          var result = await model.store(Mediation.Silent);
+                          snackbar(result.toString());
+                        } catch (e) {
+                          snackbar(e.toString());
+                        }
                       },
                     ),
                     ListTile(
                       title: Text("Store(Optional)"),
-                      onTap: () {
-                        var result = model.get(Mediation.Optional);
-                        snackbar(result.toString());
+                      onTap: () async {
+                        try {
+                          var result = await model.store(Mediation.Optional);
+                          snackbar(result.toString());
+                        } catch (e) {
+                          snackbar(e.toString());
+                        }
                       },
                     ),
                     ListTile(
                       title: Text("Store(Required)"),
-                      onTap: () {
-                        var result = model.get(Mediation.Required);
-                        snackbar(result.toString());
+                      onTap: () async {
+                        try {
+                          var result = await model.store(Mediation.Required);
+                          snackbar(result.toString());
+                        } catch (e) {
+                          snackbar(e.toString());
+                        }
                       },
                     ),
                     ListTile(
                       title: Text("Get(Silent)"),
-                      onTap: () {
-                        var result = model.get(Mediation.Silent);
+                      onTap: () async {
+                        var result = await model.get(Mediation.Silent);
                         snackbar(result.toString());
                       },
                     ),
                     ListTile(
                       title: Text("Get(Optional)"),
-                      onTap: () {
-                        model.delete();
-                        snackbar("Done");
+                      onTap: () async {
+                        var result = await model.get(Mediation.Optional);
+                        snackbar(result.toString());
                       },
                     ),
                     ListTile(
                       title: Text("Get(Required)"),
-                      onTap: () {
-                        model.delete();
-                        snackbar("Done");
+                      onTap: () async {
+                        var result = await model.get(Mediation.Required);
+                        snackbar(result.toString());
                       },
                     ),
                     ListTile(
                       title: Text("Delete"),
-                      onTap: () {
-                        model.delete();
-                        snackbar("Done");
+                      onTap: () async {
+                        try {
+                          await model.delete();
+                          snackbar("Done");
+                        } catch (e) {
+                          snackbar(e.toString());
+                        }
                       },
                     ),
                     ListTile(
@@ -103,21 +116,21 @@ class App extends StatelessWidget {
                     ),
                     ListTile(
                       title: Text("preventSilentAccess"),
-                      onTap: () {
-                        model.preventSilentAccess();
+                      onTap: () async {
+                        await model.preventSilentAccess();
                         snackbar("Done");
                       },
                     ),
                     ListTile(
                       title: Text("openPlatformCredentialSettings"),
-                      onTap: () {
-                        model.openPlatformCredentialSettings();
+                      onTap: () async {
+                        await model.openPlatformCredentialSettings();
                         snackbar("Done");
                       },
                     ),
                   ]))
                 ]));
-              }()));
+              })));
         }));
   }
 }

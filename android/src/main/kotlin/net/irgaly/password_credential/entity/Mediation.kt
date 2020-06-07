@@ -9,3 +9,7 @@ enum class Mediation {
     Required
 }
 
+fun mediationFrom(name: String): Mediation? {
+    return Mediation.values().firstOrNull { it.name == name }
+}
+
