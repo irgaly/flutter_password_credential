@@ -1,0 +1,18 @@
+name: password_credential_example
+description: example
+publish_to: 'none'
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.17.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  password_credential:
+    path: ../
+  cupertino_icons: ^0.1.3
+  provider: ^4.0.4
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
