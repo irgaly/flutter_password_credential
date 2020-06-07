@@ -22,4 +22,9 @@ class PasswordCredential {
   Map<String, dynamic> toJson() {
     return {"id": id, "password": password, "name": name, "iconUrl": iconUrl};
   }
+
+  @override
+  String toString() {
+    return 'PasswordCredential{id: $id, password: $password, name: $name, iconUrl: $iconUrl}';
+  }
 }

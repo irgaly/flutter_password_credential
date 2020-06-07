@@ -46,6 +46,20 @@ class App extends StatelessWidget {
                   Expanded(
                       child: ListView(children: <Widget>[
                     ListTile(
+                      title: Text("Input Dummy ID/Password"),
+                      onTap: () async {
+                        model.idEdit.text = "my_id";
+                        model.passwordEdit.text = "my_password";
+                      },
+                    ),
+                    ListTile(
+                      title: Text("Clear Inputs"),
+                      onTap: () async {
+                        model.idEdit.text = "";
+                        model.passwordEdit.text = "";
+                      },
+                    ),
+                    ListTile(
                       title: Text("Store(Silent)"),
                       onTap: () async {
                         try {
