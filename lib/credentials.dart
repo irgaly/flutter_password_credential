@@ -30,11 +30,21 @@ class Credentials {
     return credential;
   }
 
+  /// store ID/Password
+  ///
+  /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
+  /// return: true if storing is succeeded
+  Future<bool> store(String id, String password, Mediation mediation) async {
+    return await storeCredential(
+        PasswordCredential(id: id, password: password), mediation);
+  }
+
   /// store Password Credential
   ///
   /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
   /// return: true if storing is succeeded
-  Future<bool> store(PasswordCredential credential, Mediation mediation) async {
+  Future<bool> storeCredential(
+      PasswordCredential credential, Mediation mediation) async {
     return await _channel.invokeMethod("store", <String, dynamic>{
       "credential": jsonEncode(credential),
       "mediation": (mediation ?? Mediation.Optional).string
