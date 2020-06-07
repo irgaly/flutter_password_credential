@@ -74,7 +74,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
 
     @OptIn(UnstableDefault::class)
     override fun onMethodCall(call: MethodCall, result: Result) {
-        launch {
+        launch(Dispatchers.Main) {
             try {
                 when (call.method) {
                     "hasCredentialFeature" -> result.success(hasCredentialFeature())
@@ -113,7 +113,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                     else -> result.notImplemented()
                 }
             } catch (e: Throwable) {
-                result.error(e.javaClass.name, e.message, e.stackTrace)
+                result.error(e.javaClass.name, e.message, e.stackTrace.toString())
             }
         }
     }
