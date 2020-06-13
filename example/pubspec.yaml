@@ -2,8 +2,8 @@ name: password_credential_example
 description: example
 publish_to: 'none'
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=2.8.0 <3.0.0"
+  flutter: ">=1.18.0"
 dependencies:
   flutter:
     sdk: flutter
