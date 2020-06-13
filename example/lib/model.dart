@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:password_credential/credentials.dart';
 import 'package:password_credential/entity/mediation.dart';
 import 'package:password_credential/entity/password_credential.dart';
+import 'package:password_credential/entity/result.dart';
 
 class Model with ChangeNotifier {
   final _credentials = Credentials();
@@ -18,7 +19,7 @@ class Model with ChangeNotifier {
     });
   }
 
-  Future<bool> store(Mediation mediation) async {
+  Future<Result> store(Mediation mediation) async {
     return await _credentials.store(idEdit.text, passwordEdit.text, mediation);
   }
 

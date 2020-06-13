@@ -17,10 +17,10 @@ extension ToString on Mediation {
 }
 
 Mediation mediationFrom(String value) {
-  var result =
-      Mediation.values.firstWhere((v) => v.toString().split(".").last == value);
-  if (result == null) {
+  try {
+    return Mediation.values
+        .firstWhere((v) => v.toString().split(".").last == value);
+  } catch (_) {
     throw ArgumentError.value(value);
   }
-  return result;
 }

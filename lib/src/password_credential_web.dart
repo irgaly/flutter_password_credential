@@ -8,6 +8,7 @@ import "package:flutter/services.dart";
 import "package:flutter_web_plugins/flutter_web_plugins.dart";
 import "package:password_credential/entity/mediation.dart";
 import "package:password_credential/entity/password_credential.dart";
+import 'package:password_credential/entity/result.dart';
 
 class PasswordCredentialPlugin {
   static void registerWith(Registrar registrar) {
@@ -37,7 +38,8 @@ class PasswordCredentialPlugin {
         if (arg == null) {
           throw ArgumentError("credential is null");
         }
-        return await _store(PasswordCredential.fromJson(jsonDecode(arg)));
+        var result = await _store(PasswordCredential.fromJson(jsonDecode(arg)));
+        return result.string;
       case "delete":
         final String id = call.arguments["id"];
         if (id == null) {
@@ -71,7 +73,7 @@ class PasswordCredentialPlugin {
     return null;
   }
 
-  Future<bool> _store(PasswordCredential credential) async {
+  Future<Result> _store(PasswordCredential credential) async {
     if (credential.id.isEmpty) {
       throw ArgumentError.value(credential, "id cannot be empty");
     }
@@ -87,8 +89,8 @@ class PasswordCredentialPlugin {
         "iconUrl": credential.iconUrl
       })
     });
-    html.Credential result = await credentials.store(c);
-    return (result?.id == credential.id);
+    await credentials.store(c);
+    return Result.Unknown;
   }
 
   Future<void> _delete(String id) async {
@@ -97,7 +99,7 @@ class PasswordCredentialPlugin {
     }
     var credentials = html.window.navigator.credentials;
     var c = await credentials.create({
-      "password": jsify({"id": id, "password": null})
+      "password": jsify({"id": id, "password": "."})
     });
     await credentials.store(c);
   }

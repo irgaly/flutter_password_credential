@@ -98,7 +98,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                         val mediation = call.argument<String>("mediation")?.let {
                             mediationFrom(it)
                         } ?: throw IllegalArgumentException("mediation is null")
-                        result.success(store(credential, mediation))
+                        result.success(if(store(credential, mediation)) "Success" else "Failure" )
                     }
                     "delete" -> {
                         val id = call.argument<String>("id")

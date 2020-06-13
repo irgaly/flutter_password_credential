@@ -5,6 +5,7 @@ import "package:flutter/services.dart";
 import 'package:password_credential/entity/password_credential.dart';
 
 import "entity/mediation.dart";
+import 'entity/result.dart';
 
 /// Credential Management API Access
 class Credentials {
@@ -33,19 +34,19 @@ class Credentials {
   /// store ID/Password
   ///
   /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
-  /// return: true if storing is succeeded
+  /// return: Result enum value
   /// throws ArgumentError: id or password is empty
-  Future<bool> store(String id, String password, Mediation mediation) async {
+  Future<Result> store(String id, String password, Mediation mediation) async {
     return await storeCredential(
-        PasswordCredential(id: id, password: password), mediation);
+        PasswordCredential(id: id, password: password, name: id), mediation);
   }
 
   /// store Password Credential
   ///
   /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
-  /// return: true if storing is succeeded
+  /// return: Result enum value. This is always Result.Unknown in Web Platform.
   /// throws ArgumentError: id or password is empty
-  Future<bool> storeCredential(
+  Future<Result> storeCredential(
       PasswordCredential credential, Mediation mediation) async {
     if (credential.id.isEmpty) {
       throw ArgumentError.value(credential, "id cannot be empty");
@@ -53,10 +54,11 @@ class Credentials {
     if (credential.password.isEmpty) {
       throw ArgumentError.value(credential, "password cannot be empty");
     }
-    return await _channel.invokeMethod("store", <String, dynamic>{
+    var result = await _channel.invokeMethod("store", <String, dynamic>{
       "credential": jsonEncode(credential),
       "mediation": (mediation ?? Mediation.Optional).string
     });
+    return resultFrom(result);
   }
 
   /// clear password for an id
