@@ -138,8 +138,12 @@ class App extends StatelessWidget {
                     ListTile(
                       title: Text("openPlatformCredentialSettings"),
                       onTap: () async {
-                        await model.openPlatformCredentialSettings();
-                        snackbar("Done");
+                        try {
+                          await model.openPlatformCredentialSettings();
+                          snackbar("Done");
+                        } catch (e) {
+                          snackbar(e.toString());
+                        }
                       },
                     ),
                   ]))

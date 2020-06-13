@@ -81,7 +81,7 @@ class Credentials {
   /// Open Platform Specific Password Credential Settings
   ///
   /// Android: Google Play Services Account Settings Page
-  /// Web Chrome: chrome://settings/passwords
+  /// Web Chrome: Not supported
   Future<void> openPlatformCredentialSettings() async {
     return await _channel.invokeMethod("openPlatformCredentialSettings");
   }

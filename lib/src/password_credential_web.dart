@@ -2,12 +2,12 @@ import "dart:async";
 import 'dart:convert';
 import "dart:html" as html;
 import "dart:js";
+import 'dart:js_util';
 
 import "package:flutter/services.dart";
 import "package:flutter_web_plugins/flutter_web_plugins.dart";
 import "package:password_credential/entity/mediation.dart";
 import "package:password_credential/entity/password_credential.dart";
-import "package:platform_detect/platform_detect.dart";
 
 class PasswordCredentialPlugin {
   static void registerWith(Registrar registrar) {
@@ -47,7 +47,8 @@ class PasswordCredentialPlugin {
       case "preventSilentAccess":
         return await _preventSilentAccess();
       case "openPlatformCredentialSettings":
-        return await _openPlatformCredentialSettings();
+        throw UnimplementedError(
+            "Web Browser is not supported for security reason.");
       default:
         throw PlatformException(
             code: "Unimplemented",
@@ -79,12 +80,12 @@ class PasswordCredentialPlugin {
     }
     var credentials = html.window.navigator.credentials;
     var c = await credentials.create({
-      "password": {
+      "password": jsify({
         "id": credential.id,
         "password": credential.password,
         "name": credential.name,
         "iconUrl": credential.iconUrl
-      }
+      })
     });
     html.Credential result = await credentials.store(c);
     return (result?.id == credential.id);
@@ -96,19 +97,13 @@ class PasswordCredentialPlugin {
     }
     var credentials = html.window.navigator.credentials;
     var c = await credentials.create({
-      "password": {"id": id, "password": ""}
+      "password": jsify({"id": id, "password": null})
     });
     await credentials.store(c);
   }
 
   Future<void> _preventSilentAccess() async {
     return await html.window.navigator.credentials.preventSilentAccess();
-  }
-
-  Future<void> _openPlatformCredentialSettings() async {
-    if (browser.isChrome) {
-      html.window.open("chrome://settings/passwords", null);
-    }
   }
 
   String _getMediation(Mediation mediation) {
