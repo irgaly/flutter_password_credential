@@ -5,8 +5,8 @@ author: irgaly
 homepage: https://github.com/irgaly/flutter_password_credential
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=2.8.0 <3.0.0"
+  flutter: ">=1.18.0"
 
 dependencies:
   flutter:
