@@ -1,7 +1,13 @@
 # password_credential
 
-Access Password Credentials.
+Flutter Plugin for Password Credentials Access.
 
-* Web: Credentials Management API
+* Web (Chrome): Credentials Management API
 * Android: Smartlock for Password
+
+## example
+
+Web Example Project.
+
+![web](docs/web_example.png)
 
