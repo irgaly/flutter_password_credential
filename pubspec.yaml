@@ -1,7 +1,6 @@
 name: password_credential
 description: Access to Platform Password Credentials.
 version: 0.1.0
-author: irgaly
 homepage: https://github.com/irgaly/flutter_password_credential
 
 environment:

@@ -9,5 +9,5 @@ Flutter Plugin for Password Credentials Access.
 
 Web Example Project.
 
-![web](docs/web_example.png)
+![web](doc/web_example.png)
 
