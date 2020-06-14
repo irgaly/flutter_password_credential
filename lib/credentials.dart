@@ -34,6 +34,8 @@ class Credentials {
   /// store ID/Password
   ///
   /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
+  ///            with Mediation.Required, stored entry will force deleted before asking user.
+  ///            so Mediation.Required is not Recommended option.
   /// return: Result enum value
   /// throws ArgumentError: id or password is empty
   Future<Result> store(String id, String password, Mediation mediation) async {
