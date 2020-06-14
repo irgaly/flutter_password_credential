@@ -9,7 +9,7 @@ Flutter Plugin for Password Credentials Access.
 
 ID and Passwords stored in Credential Management API or Smartlock are synced when user logged in Chrome or Android with same Google Account.
 
-## example
+## Example Project
 
 Web Example Project.
 
@@ -18,3 +18,16 @@ Web Example Project.
 Android Example Project.
 
 ![android](doc/example_android.png)
+
+## User Settings
+
+Describing User-side Settings for Credentials Management System.
+
+If the user has disabled Password Storing at System wide, or disabled per apps, the storing operations always failed with no user interaction.
+
+If the user has disabled Auto Sign-in at System wide, the Silent Read operation always failed, and other read operation always asking user to read a password entry.
+
+![web](doc/user_settings_web.png)
+
+![android](doc/user_settings_android.png)
+
