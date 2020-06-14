@@ -3,7 +3,7 @@ description: example
 publish_to: 'none'
 environment:
   sdk: ">=2.8.0 <3.0.0"
-  flutter: ">=1.18.0"
+  flutter: ">=1.17.0"
 dependencies:
   flutter:
     sdk: flutter
