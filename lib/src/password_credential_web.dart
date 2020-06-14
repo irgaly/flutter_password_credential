@@ -117,5 +117,6 @@ class PasswordCredentialPlugin {
       case Mediation.Required:
         return "required";
     }
+    throw ArgumentError();
   }
 }
