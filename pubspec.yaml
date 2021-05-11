@@ -1,11 +1,11 @@
 name: password_credential
 description: Access to Credential Management API Password Credential in Web, and Smartlock for Password in Android.
-version: 0.1.6
+version: 0.2.0
 homepage: https://github.com/irgaly/flutter_password_credential
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
-  flutter: ">=1.17.0"
+  flutter: ">=1.20.0"
 
 dependencies:
   flutter:
