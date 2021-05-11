@@ -22,26 +22,26 @@ class PasswordCredentialPlugin {
       case "hasCredentialFeature":
         return await _hasCredentialFeature();
       case "get":
-        String arg = call.arguments["mediation"];
+        String? arg = call.arguments["mediation"];
         if (arg == null) {
           throw ArgumentError("mediation is null");
         }
         var mediation = mediationFrom(arg);
         var result = await _get(mediation);
-        String ret;
+        String? ret;
         if (result != null) {
           ret = jsonEncode(result);
         }
         return ret;
       case "store":
-        String arg = call.arguments["credential"];
+        String? arg = call.arguments["credential"];
         if (arg == null) {
           throw ArgumentError("credential is null");
         }
         var result = await _store(PasswordCredential.fromJson(jsonDecode(arg)));
         return result.string;
       case "delete":
-        final String id = call.arguments["id"];
+        final String? id = call.arguments["id"];
         if (id == null) {
           throw ArgumentError("id is null");
         }
@@ -63,9 +63,9 @@ class PasswordCredentialPlugin {
     return context.hasProperty("PasswordCredential");
   }
 
-  Future<PasswordCredential> _get(Mediation mediation) async {
-    html.Credential c = await html.window.navigator.credentials
-        .get({"password": true, "mediation": _getMediation(mediation)});
+  Future<PasswordCredential?> _get(Mediation mediation) async {
+    html.Credential? c = await (html.window.navigator.credentials!
+        .get({"password": true, "mediation": _getMediation(mediation)}) as FutureOr<html.Credential?>);
     if (c is html.PasswordCredential) {
       return PasswordCredential(
           id: c.id, password: c.password, name: c.name, iconUrl: c.iconUrl);
@@ -74,13 +74,13 @@ class PasswordCredentialPlugin {
   }
 
   Future<Result> _store(PasswordCredential credential) async {
-    if (credential.id.isEmpty) {
+    if (credential.id!.isEmpty) {
       throw ArgumentError.value(credential, "id cannot be empty");
     }
-    if (credential.password.isEmpty) {
+    if (credential.password!.isEmpty) {
       throw ArgumentError.value(credential, "password cannot be empty");
     }
-    var credentials = html.window.navigator.credentials;
+    var credentials = html.window.navigator.credentials!;
     var c = await credentials.create({
       "password": jsify({
         "id": credential.id,
@@ -97,7 +97,7 @@ class PasswordCredentialPlugin {
     if (id.isEmpty) {
       throw ArgumentError.value(id, "id cannot be empty");
     }
-    var credentials = html.window.navigator.credentials;
+    var credentials = html.window.navigator.credentials!;
     var c = await credentials.create({
       "password": jsify({"id": id, "password": "."})
     });
@@ -105,7 +105,7 @@ class PasswordCredentialPlugin {
   }
 
   Future<void> _preventSilentAccess() async {
-    return await html.window.navigator.credentials.preventSilentAccess();
+    return await html.window.navigator.credentials!.preventSilentAccess();
   }
 
   String _getMediation(Mediation mediation) {

@@ -13,7 +13,7 @@ class Credentials {
       const MethodChannel("password_credential");
 
   /// Weather this platform has PasswordCredential Feature.
-  Future<bool> get hasCredentialFeature async {
+  Future<bool?> get hasCredentialFeature async {
     return await _channel.invokeMethod("hasCredentialFeature");
   }
 
@@ -21,10 +21,10 @@ class Credentials {
   ///
   /// mediation: if null, default is Mediation.Silent
   /// return: a PasswordCredential, or null if cannot get single Password from Credential Store
-  Future<PasswordCredential> get(Mediation mediation) async {
-    String result = await _channel.invokeMethod("get",
+  Future<PasswordCredential?> get(Mediation mediation) async {
+    String? result = await _channel.invokeMethod("get",
         <String, dynamic>{"mediation": (mediation ?? Mediation.Silent).string});
-    PasswordCredential credential;
+    PasswordCredential? credential;
     if (result != null) {
       credential = PasswordCredential.fromJson(jsonDecode(result));
     }
@@ -50,10 +50,10 @@ class Credentials {
   /// throws ArgumentError: id or password is empty
   Future<Result> storeCredential(
       PasswordCredential credential, Mediation mediation) async {
-    if (credential.id.isEmpty) {
+    if (credential.id!.isEmpty) {
       throw ArgumentError.value(credential, "id cannot be empty");
     }
-    if (credential.password.isEmpty) {
+    if (credential.password!.isEmpty) {
       throw ArgumentError.value(credential, "password cannot be empty");
     }
     var result = await _channel.invokeMethod("store", <String, dynamic>{
