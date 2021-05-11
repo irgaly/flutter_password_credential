@@ -64,8 +64,8 @@ class PasswordCredentialPlugin {
   }
 
   Future<PasswordCredential?> _get(Mediation mediation) async {
-    html.Credential? c = await (html.window.navigator.credentials!
-        .get({"password": true, "mediation": _getMediation(mediation)}) as FutureOr<html.Credential?>);
+    html.Credential? c = await html.window.navigator.credentials!
+        .get({"password": true, "mediation": _getMediation(mediation)});
     if (c is html.PasswordCredential) {
       return PasswordCredential(
           id: c.id, password: c.password, name: c.name, iconUrl: c.iconUrl);

@@ -20,11 +20,12 @@ class Model with ChangeNotifier {
   }
 
   Future<Result> store(Mediation mediation) async {
-    return await _credentials.store(idEdit.text, passwordEdit.text, mediation);
+    return await _credentials.store(idEdit.text, passwordEdit.text,
+        mediation: mediation);
   }
 
   Future<PasswordCredential> get(Mediation mediation) async {
-    var credential = await _credentials.get(mediation);
+    var credential = await _credentials.get(mediation: mediation);
     if (credential != null) {
       idEdit.text = credential.id;
       passwordEdit.text = credential.password;

@@ -19,11 +19,12 @@ class Credentials {
 
   /// get Password Credential
   ///
-  /// mediation: if null, default is Mediation.Silent
+  /// mediation: default is Mediation.Silent
   /// return: a PasswordCredential, or null if cannot get single Password from Credential Store
-  Future<PasswordCredential?> get(Mediation mediation) async {
-    String? result = await _channel.invokeMethod("get",
-        <String, dynamic>{"mediation": (mediation ?? Mediation.Silent).string});
+  Future<PasswordCredential?> get(
+      {Mediation mediation = Mediation.Silent}) async {
+    String? result = await _channel
+        .invokeMethod("get", <String, dynamic>{"mediation": mediation.string});
     PasswordCredential? credential;
     if (result != null) {
       credential = PasswordCredential.fromJson(jsonDecode(result));
@@ -33,23 +34,25 @@ class Credentials {
 
   /// store ID/Password
   ///
-  /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
+  /// mediation: default is Mediation.Optional. This is ignored in Web.
   ///            with Mediation.Required, stored entry will force deleted before asking user.
   ///            so Mediation.Required is not Recommended option.
   /// return: Result enum value
   /// throws ArgumentError: id or password is empty
-  Future<Result> store(String id, String password, Mediation mediation) async {
+  Future<Result> store(String id, String password,
+      {Mediation mediation = Mediation.Optional}) async {
     return await storeCredential(
-        PasswordCredential(id: id, password: password, name: id), mediation);
+        PasswordCredential(id: id, password: password, name: id),
+        mediation: mediation);
   }
 
   /// store Password Credential
   ///
-  /// mediation: if null, default is Mediation.Optional. This is ignored in Web.
+  /// mediation: default is Mediation.Optional. This is ignored in Web.
   /// return: Result enum value. This is always Result.Unknown in Web Platform.
   /// throws ArgumentError: id or password is empty
-  Future<Result> storeCredential(
-      PasswordCredential credential, Mediation mediation) async {
+  Future<Result> storeCredential(PasswordCredential credential,
+      {Mediation mediation = Mediation.Optional}) async {
     if (credential.id!.isEmpty) {
       throw ArgumentError.value(credential, "id cannot be empty");
     }
@@ -58,7 +61,7 @@ class Credentials {
     }
     var result = await _channel.invokeMethod("store", <String, dynamic>{
       "credential": jsonEncode(credential),
-      "mediation": (mediation ?? Mediation.Optional).string
+      "mediation": mediation.string
     });
     return resultFrom(result);
   }
