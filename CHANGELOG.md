@@ -1,3 +1,7 @@
+## [0.3.1] - 2021/06/04
+
+* Fix README.md on pub.dev
+
 ## [0.3.0] - 2021/06/04
 
 * Fix Android Build Error
