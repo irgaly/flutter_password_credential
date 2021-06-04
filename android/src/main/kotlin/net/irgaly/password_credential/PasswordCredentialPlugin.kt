@@ -42,7 +42,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         job = Job()
-        channel = MethodChannel(flutterPluginBinding.flutterEngine.dartExecutor, "password_credential").apply {
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "password_credential").apply {
             setMethodCallHandler(this@PasswordCredentialPlugin)
         }
         credentialsClient = Credentials.getClient(
