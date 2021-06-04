@@ -18,9 +18,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.*
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import net.irgaly.password_credential.entity.Mediation
 import net.irgaly.password_credential.entity.PasswordCredential
 import net.irgaly.password_credential.entity.mediationFrom
@@ -40,7 +38,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     private var pendingSaveContinuation: Continuation<Boolean>? = null
     private var pendingReadContinuation: Continuation<PasswordCredential?>? = null
     private val pendingLock = Object()
-    private val json = Json(JsonConfiguration.Stable.copy(isLenient = false))
+    private val json = Json { isLenient = false }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         job = Job()
@@ -76,7 +74,6 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         job.cancel()
     }
 
-    @OptIn(UnstableDefault::class)
     override fun onMethodCall(call: MethodCall, result: Result) {
         launch(Dispatchers.Main) {
             try {
@@ -87,13 +84,13 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                             mediationFrom(it)
                         } ?: throw IllegalArgumentException("mediation is null")
                         val ret = get(mediation)?.let {
-                            json.stringify(PasswordCredential.serializer(), it)
+                            json.encodeToString(PasswordCredential.serializer(), it)
                         }
                         result.success(ret)
                     }
                     "store" -> {
                         val credential = call.argument<String>("credential")?.let {
-                            json.parse(PasswordCredential.serializer(), it)
+                            json.decodeFromString(PasswordCredential.serializer(), it)
                         } ?: throw IllegalArgumentException("credential is null")
                         val mediation = call.argument<String>("mediation")?.let {
                             mediationFrom(it)
