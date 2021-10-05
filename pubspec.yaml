@@ -26,4 +26,5 @@ flutter:
       web:
         pluginClass: PasswordCredentialPlugin
         fileName: src/password_credential_web.dart
-
+      ios:
+        pluginClass: PasswordCredentialPlugin

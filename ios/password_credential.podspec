@@ -3,7 +3,7 @@
 # Run `pod lib lint flutter_password_credential.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'flutter_password_credential'
+  s.name             = 'password_credential'
   s.version          = '0.0.1'
   s.summary          = 'A new flutter plugin project.'
   s.description      = <<-DESC

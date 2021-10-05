@@ -1,4 +1,4 @@
 #import <Flutter/Flutter.h>
 
-@interface FlutterPasswordCredentialPlugin : NSObject<FlutterPlugin>
+@interface PasswordCredentialPlugin : NSObject<FlutterPlugin>
 @end
