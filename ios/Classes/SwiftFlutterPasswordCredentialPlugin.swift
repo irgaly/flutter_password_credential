@@ -17,8 +17,12 @@ public class SwiftFlutterPasswordCredentialPlugin: NSObject, FlutterPlugin {
             let keyStore: NSUbiquitousKeyValueStore = NSUbiquitousKeyValueStore.default
             keyStore.synchronize()
             if let storedData = keyStore.dictionaryRepresentation as? [String : String] {
-                let encoded = try! JSONEncoder().encode(storedData)
-                result(String(data: encoded, encoding: .utf8))
+                if storedData.isEmpty {
+                    result(nil)
+                } else {
+                    let encoded = try! JSONEncoder().encode(storedData)
+                    result(String(data: encoded, encoding: .utf8))
+                }
             } else {
                 result(nil)
             }

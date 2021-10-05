@@ -8,8 +8,9 @@ Flutter Plugin for Password Credentials Access.
 * Android: Smartlock for Password
     * [Android Smartlock for Password Document](https://developer.android.com/distribute/best-practices/develop/smart-lock-for-passwords)
 * iOS: iCloud Key-Value Storage
+    * [iCloud Key-Value Storage](https://developer.apple.com/library/archive/documentation/General/Conceptual/iCloudDesignGuide/Chapters/DesigningForKey-ValueDataIniCloud.html) 
 
-ID and Passwords stored in Credential Management API or Smartlock are synced when user logged in Chrome Android with same Google Account.
+ID and Passwords stored in Credential Management API or Smartlock are synced when user logged in Chrome Android with same Google Account and on iOS when the same Apple ID is used.
 
 ## Example Project
 
@@ -35,15 +36,12 @@ In Android, per Apps decline settings are saved with **All Google Accounts that 
 The Store Permission Dialogs can be displayed, **ONLY** if all Google Accounts settings has not decline that app.
 If user cannot see any dialogs and cannot store credentials, check **ALL** Google Accounts Autofill Settings, and allow your app to store credentials at **ALL** Google Accounts.
 
+![web](doc/user_settings_web.png)
+
+![android](doc/user_settings_android.png)
+
 ## iOS Settings
 
 1. Activate target capabilities for icloud
 2. Choose "key-value storage"
 3. Make sure that all steps are successful (and the entitlement file contains the icloud entitlement)
-4. Enable iCloud in your app-id's application services, for key-value storage "Compatible with Xcode 5" suffices
-5. Make sure, that your app-id and provisioning profile include the icloud entitlement file
-
-![web](doc/user_settings_web.png)
-
-![android](doc/user_settings_android.png)
-

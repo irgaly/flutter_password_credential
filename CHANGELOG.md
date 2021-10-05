@@ -1,3 +1,7 @@
+## [0.4.0] - 2021/10/05
+
+* add support for iOS iCloud Key-Value storage
+
 ## [0.3.1] - 2021/06/04
 
 * Fix README.md on pub.dev
