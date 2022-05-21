@@ -27,7 +27,7 @@ apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
