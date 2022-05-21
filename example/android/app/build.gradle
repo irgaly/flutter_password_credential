@@ -40,7 +40,6 @@ android {
     defaultConfig {
         applicationId "net.irgaly.password_credential_example"
         minSdkVersion 16
-        targetSdkVersion 29
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
