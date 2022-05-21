@@ -1,3 +1,10 @@
+## [0.3.2] - 2022/05/21
+
+* Android Compile SDK version 31
+* Update Android Libraries
+    * Kotlin 1.6.21
+    * play-services-auth 20.2.0
+
 ## [0.3.1] - 2021/06/04
 
 * Fix README.md on pub.dev
