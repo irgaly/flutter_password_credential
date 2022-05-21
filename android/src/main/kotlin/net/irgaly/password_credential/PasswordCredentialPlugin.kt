@@ -160,7 +160,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                                 pendingReadContinuation?.resume(null)
                                 pendingReadContinuation = continuation
                             }
-                            e.startResolutionForResult(activity, requestCodeRead)
+                            e.startResolutionForResult(checkNotNull(activity), requestCodeRead)
                         } else {
                             continuation.resume(null) // mediation is Silent, so failed to get credential
                         }
@@ -208,7 +208,7 @@ class PasswordCredentialPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
                                 pendingSaveContinuation = continuation
                             }
                             pendingSaveContinuation = continuation
-                            e.startResolutionForResult(activity, requestCodeSave)
+                            e.startResolutionForResult(checkNotNull(activity), requestCodeSave)
                         } else {
                             continuation.resume(false) // User interaction is not allowed
                         }
